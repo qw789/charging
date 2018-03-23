@@ -449,7 +449,6 @@ input[type="range"]::after {
 }
 .content {
   width: 700/75rem;
-  // height: 500/75rem;
   background: #fff;
   border-radius: 10px;
 }
