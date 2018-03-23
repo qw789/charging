@@ -306,8 +306,6 @@ input[type="range"]::after {
 }
 .flex-group {
   display: flex;
-  // flex-wrap: wrap;
-  // justify-content: space-between;
   padding: 0 40px;
   font-size: 0.37rem;
   background: #fff;
