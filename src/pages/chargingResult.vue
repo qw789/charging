@@ -8,9 +8,9 @@
     </div>
     <div class="flex-group">
          <flexbox>
-          <!-- <flexbox-item>
-            <x-button type="primary" style="border-radius:99px;background:#4582ff;" @click.native="recharge()">开始充电</x-button>
-          </flexbox-item> -->
+          <flexbox-item v-show="ChargeContinue">
+            <x-button type="primary" style="border-radius:99px;background:#4582ff;" @click.native="recharge()">继续充电</x-button>
+          </flexbox-item>
           <flexbox-item style="padding:0 30px">
             <x-button plain style="border-radius:99px;" @click.native="goback()">返回账户</x-button>
           </flexbox-item>
@@ -29,19 +29,27 @@ export default {
   },
   data () {
     return{
-      status:"充值成功"
+      status:"充值成功",
+      ChargeContinue:false
     }
   },
   methods:{
     goback(){
-      this.$router.push('selfCenter')
+       var mp = this.$route.query.mp;
+      this.$router.push({name:'selfCenter', query: { mp: mp }})
     },
     recharge(){
-      this.$router.push("haslogin")
+       var mp = this.$route.query.mp;
+       var addr = this.$route.query.addr;
+      this.$router.push({name:"haslogin", query: { mp: mp,addr:addr }})
     }
    },
     created() {
     document.title="充值结果";
+    var center=this.$route.query.center;
+    if(center=="self"){
+      this.ChargeContinue=true;
+    }
   }
 }
 </script>

@@ -7,9 +7,6 @@ import charging from '@/pages/charging'
 import chargingResult from '@/pages/chargingResult'
 import chargingFail from '@/pages/chargingFail'
 import selfCenter from '@/pages/selfCenter'
-// import canotStart from '@/pages/canotStart'
-// import nologin from '@/pages/nologin'
-// import nofree from '@/pages/nofree'
 import haslogin from '@/pages/haslogin'
 import redCharging from '@/pages/redCharging'
 import chargingFinish from '@/pages/chargingFinish'
@@ -60,21 +57,6 @@ export default new Router({
       component: selfCenter,
       meta: {title: "个人中心"}
     },
-    //  {
-    //  path: '/canotStart',
-    //   name: 'canotStart',
-    //   component: canotStart
-    // },
-    // {
-    //  path: '/nologin',
-    //   name: 'nologin',
-    //   component: nologin
-    // },
-    // {
-    //  path: '/nofree',
-    //   name: 'nofree',
-    //   component: nofree
-    // },
     {
      path: '/haslogin',
       name: 'haslogin',

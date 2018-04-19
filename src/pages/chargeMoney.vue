@@ -63,10 +63,12 @@ export default {
   },
   methods: {
     fetchData(cb) {
+       var mp = this.$route.query.mp;
       this.$http
         .post("/api/recharge/list", {
           page: this.page,
-          limit: 10
+          limit: 10,
+          mp:mp
         })
         .then(response => {
           this.$nextTick(() => {

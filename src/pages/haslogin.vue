@@ -1,15 +1,6 @@
 <template>
   <div class="demo">
-    <div class="flex-two">
-      <div class="flex-item ">
-        <i style="margin-right:10px;"><img :src="aboutData.tenantLogo" alt="" class="wallet"></i>{{aboutData.tenantName}}
-      </div>
-      <div class="flex-item">
-        <a :href="'tel:'+aboutData.tenantPhone">
-          <img src="../assets/phone.png" alt="" class="wallet">
-        </a>
-      </div>
-    </div>
+    <GoSelf :headerData="aboutData"></GoSelf>
     <div class="flex-start" style="border:1px solid #eee;">
       <span style="margin-right:10px;">
         <img src="../assets/chongdianz.png" alt="" class="chongdian">
@@ -64,14 +55,14 @@
     <!-- 底部 -->
     <div class="flex-center">
       <div>
-        <div class="circle" :class="{ grayBack: grayBack }" @click="gologin()">
-          <div :class="{status1:status1}">{{text}}</div>
+        <div class="circle" :class="{ grayBack: grayBack }" @click="debounceClick">
+          <div :class="{status1:status1}">{{btText}}</div>
           <img src="../assets/chatou.png" alt="" class="chatou" v-if="aboutData.hasLogin==true && aboutData.chargingCount==0 && aboutData.status==0">
         </div>
         <div class="font-24" v-show="aboutData.hasLogin==true">余额
           <span>{{aboutData.available|returnFloat}}</span>
         </div>
-        <div class="color-red" v-show="aboutData.hasLogin==true" @click="goCharging()">立即充值></div>
+        <div class="color-red" v-show="aboutData.hasLogin==true" @click="goRecharge()">立即充值></div>
       </div>
     </div>
     <div class="bottom2" v-if="aboutData.hasLogin==true && aboutData.chargingCount!=0">
@@ -82,22 +73,27 @@
         查看
       </div>
     </div>
+
   </div>
 </template>
 
 <script>
+import { debounce } from "../common/util.js";
+import GoSelf from "@/components/goSelf";
 export default {
+  components: {
+    GoSelf
+  },
   data() {
     return {
       aboutData: {
-        peakPrice:0,
-        usuallyPrice:0,
-        valleyPrice:0,
-        service:0
+        peakPrice: 0,
+        usuallyPrice: 0,
+        valleyPrice: 0,
+        service: 0
       },
-      grayBack: true,
-      status1: "",
-      text: "开始充电",
+      grayBack: false,
+      btText: "开始充电",
       ifBusy: "",
       status1: false
     };
@@ -105,9 +101,11 @@ export default {
   methods: {
     getApi() {
       var addr = this.$route.query.addr;
+      var mp = this.$route.query.mp;
       this.$http
         .post("/api/charging/info", {
-          addr: addr
+          addr: addr,
+          mp: mp
         })
         .then(
           function(res) {
@@ -146,35 +144,39 @@ export default {
               }
               //开始判断
               if (this.aboutData.hasAuthorize == false) {
-                this.text = "请先授权登陆";
+                this.btText = "请先授权登陆";
                 return false;
               } else {
-                 if(this.aboutData.status==3){
-                   this.text = "已停用";
-                   return false;
-                 }
-                if (this.aboutData.chargingCount != 0) { //有订单，跳转到充电中
-                  if(this.aboutData.chargingAddr==addr){
-                     location.href = "/api/chargingView";
+                if (this.aboutData.status == 3) {
+                  this.btText = "已停用";
+                  return false;
+                }
+                if (this.aboutData.chargingCount != 0) {
+                  //有订单，跳转到充电中
+                  if (this.aboutData.chargingAddr == addr) {
+                    location.href = "/api/chargingView?mp=" + mp;
                   }
                   this.grayBack = true;
                 } else {
-                  if (this.aboutData.status == 0) {
-                    this.text = "请插枪"; //已经登录却没插枪
-                    this.status1 = true;
-                  }
-                  if (this.aboutData.status == 1) {
-                    if (this.aboutData.hasLogin == false) {
-                      this.text = "登录后充电";
-                    } else {
-                      this.text = "开始充电"; //已经登录也插枪了
+                  //是否可用
+                    if (
+                      this.aboutData.status == 1 ||
+                      this.aboutData.status == 5 ||this.aboutData.status == 0
+                    ) {
+                      if(this.aboutData.hasLogin == false){
+                        this.btText = "登录后充电";
+                      }else{
+                        this.btText = "开始充电"; //已经登录也插枪了
+                        if(this.aboutData.status == 0){
+                          this.btText = "请插枪"; //已经登录却没插枪
+                          this.status1 = true;
+                        }
+                      }
                     }
-                  }
                   if (
                     this.aboutData.status == 2 ||
                     this.aboutData.status == 3 ||
                     this.aboutData.status == 4 ||
-                    this.aboutData.status == 5 ||
                     this.aboutData.status == 6
                   ) {
                     this.grayBack = true;
@@ -182,6 +184,7 @@ export default {
                 }
               }
             } else {
+              this.grayBack = true;
               this.$msgbox(res.data.msg);
             }
           }.bind(this)
@@ -192,24 +195,27 @@ export default {
     },
     gologin() {
       var addr = this.$route.query.addr;
+      var mp = this.$route.query.mp;
       if (this.aboutData.chargingCount == 0) {
-        if (this.aboutData.status == 1) {
+        if (this.aboutData.status == 1 || this.aboutData.status == 5 || this.aboutData.status == 0 ) {
           if (this.aboutData.hasLogin == false) {
             location.href =
               "/api/login?state=http://cp.gtcx-tech.com/api/scanCharge?addr=" +
-              addr;
+              addr +
+              "&mp=" +
+              mp;
           } else {
-            var addr = this.$route.query.addr;
             this.$http
               .post("api/charging/start", {
-                addr: addr
+                addr: addr,
+                mp: mp
               })
               .then(
                 function(res) {
                   if (res.data.code == 0) {
-                    location.href = "/api/chargingView?flag=true";
+                    location.href = "/api/chargingView?flag=true&mp=" + mp;
                   } else {
-                    this.$msgbox("系统提醒",res.data.msg);
+                    this.$msgbox(res.data.msg);
                   }
                 }.bind(this)
               )
@@ -220,14 +226,27 @@ export default {
         }
       }
     },
-    goCharging(){
-       this.$router.push({
-        name: "charging" 
+    debounceClick: debounce(function(e) {
+      this.gologin();
+    }, 300),
+    // debounceClick(){
+    //   this.gologin();
+    // },
+    goRecharge() {
+      var addr = this.$route.query.addr;
+      var mp = this.$route.query.mp;
+      var center = "self";
+      this.$router.push({
+        name: "charging",
+        query: { mp: mp, center: center, addr: addr }
       });
     },
-    checkOrder(){
+    checkOrder() {
+      var mp = this.$route.query.mp;
+      var addr = this.$route.query.addr;
       this.$router.push({
-        name: "redCharging" 
+        name: "redCharging",
+        query: { mp: mp, addr: addr }
       });
     }
   },
@@ -236,7 +255,9 @@ export default {
     this.getApi();
   },
   beforeDestroy() {
-    clearInterval(intervalid2);
+    if (this.ifBusy == "空闲") {
+      clearInterval(intervalid2);
+    }
   },
   filters: {
     returnFloat(value) {
@@ -265,17 +286,7 @@ li {
 .demo {
   background: #f2f2f2;
 }
-.flex-two {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 25px;
-  font-size: 0.37rem;
-  margin-bottom: 10px;
-  background: #fff;
-  height: 1.33rem;
-  line-height: 1.33rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
+
 .flex-twos {
   display: flex;
   justify-content: space-between;
@@ -297,12 +308,6 @@ li {
 }
 .font-w {
   font-weight: 600;
-}
-.wallet {
-  width: 60/75rem;
-  height: 60/75rem;
-  display: inline-block;
-  vertical-align: middle;
 }
 .chongdian {
   display: inline-block;

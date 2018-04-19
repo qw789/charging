@@ -76,10 +76,12 @@ export default {
     fetchData(cb) {
       // var d = new Date();
       // var str = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+      var mp = this.$route.query.mp;
       this.$http
         .post("/api/charging/list", {
           page: this.page,
           limit: 10,
+          mp:mp
           // month: str
         })
         .then(response => {
@@ -115,9 +117,10 @@ export default {
     },
     goDetail(ele) {
       var orderId = ele.number;
+       var mp = this.$route.query.mp;
       this.$router.push({
         name: "chargingFinish",
-        query: { orderId: orderId }
+        query: { orderId: orderId,mp:mp}
       });
     },
     moments(item) {

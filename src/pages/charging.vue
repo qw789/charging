@@ -8,7 +8,7 @@
     </header>
     <div class="flex-two-c">
       <div>充值金额</div>
-      <div><span><input class="no-outline" type="number" v-model="money" @input="shows()" placeholder="请输入充值金额">元</span></div>
+      <div><span><input id="number" class="no-outline" type="number" v-model="money" @input="shows()" placeholder="请输入充值金额">元</span></div>
     </div>
     <div class="min-money">
         <!-- 单笔金额大于50元 -->
@@ -45,7 +45,6 @@ export default {
       ],
       activeName: '',
       money:'',
-      moneyShow:false,
       dis:true,
       bac:"",
       show: false,
@@ -55,34 +54,47 @@ export default {
   },
   methods:{
     selected: function(item) {
-      this.moneyShow=true;
-      this.bac="bac";
-      this.dis=false;      
       this.activeName = item;
       this.money=item;
+      this.bac="bac";
+      this.dis=false;      
       this.die=false;
+      // if(this.money<=0.05){
+      //    this.bac="bac";
+      //    this.dis=false; 
+      //    this.die=false; 
+      // }else{
+      //     this.bac="";
+      //     this.dis=true;
+      //     this.die=true;
+      // }
+      
     },
     shows(){
       this.bac="bac";
       this.dis=false;
       this.die=false;
-      // if(this.money>=50){
+      // if(this.money<=0.05){
       //    this.bac="bac";
-      //    this.dis=false;    
+      //    this.dis=false; 
+      //    this.die=false;   
       // }else{
       //    this.bac="";
       //    this.dis=true;
+      //    this.die=true;
       // }
     },
     charge(){
+       var mp = this.$route.query.mp;
        this.$http.post('/api/recharge/pay',{
-         money:this.money
+         money:this.money,
+         mp:mp
        })
       .then(function(res){
         if(res.data.code==0){
            this.weixinPay(res.data.data);
         }else{
-          this.$msgbox("系统提醒",res.data.msg);
+          this.$msgbox(res.data.msg);
         }
       }.bind(this))
       .catch(function(err){
@@ -101,10 +113,14 @@ export default {
                 "paySign":data.paySign //微信签名 
             },
             function(res){     
+               var mp = that.$route.query.mp;
+               var center=that.$route.query.center;
+               var addr = that.$route.query.addr;
+              //  alert(res.err_msg)
                 if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-                    that.$router.push({name:'chargingResult'});
+                    that.$router.push({name:'chargingResult',query: { mp: mp, center:center,addr:addr }});
                 }else{
-                    that.$router.push({name:'chargingFail'});
+                    that.$router.push({name:'chargingFail',query: { mp: mp,center:center,addr:addr }});
                 }
             }
         ); 
@@ -125,8 +141,15 @@ export default {
   },
    created() {
     document.title="充值";
+  },
+  mounted(){
+    document.getElementById("number").addEventListener("input",function(event){
+      //number类型如果输入有误获取不到值,所以把空传给event.target.value
+       event.target.value = event.target.value
+    });
   }
 }
+
 </script>
 
 <style lang="less" rel="stylesheet/less" scoped>

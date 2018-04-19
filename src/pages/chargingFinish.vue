@@ -154,15 +154,19 @@ export default {
   },
   methods: {
     login() {
+       var mp = this.$route.query.mp;
       this.$router.push({
-        name: "charging"
+        name: "charging",
+         query: { mp: mp }
       });
     },
     getApi() {
       var orderId = this.$route.query.orderId;
+      var mp = this.$route.query.mp;
       this.$http
         .post("/api/charging/detail", {
-          orderId: orderId
+          orderId: orderId,
+          mp:mp
         })
         .then(
           function(res) {

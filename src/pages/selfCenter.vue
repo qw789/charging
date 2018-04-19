@@ -28,7 +28,7 @@
         <div class="flex-le">
           <div class="wrap-img" style="display:flex;align-items: center;"><img src="../assets/钱包.png" class="wallet"></div>
           <div class="wrap-img">
-            <div class="color-3">{{aboutData.balance|returnFloat}}</div>
+            <div class="color-3">{{aboutData.accountAvailable|returnFloat}}</div>
             <div class="color-9 font-24">余额(元)</div>
           </div>
         </div>
@@ -36,7 +36,7 @@
           <x-button plain style="border-radius:99px;color:#4582ff;border:1px solid #4582ff;width:120px;font-size:16px;" @click.native="goCharging">立即充值</x-button>
         </div>
       </div>
-      <div class="charging" style="margin:0;border-bottom:1px solid #eee;" @click="gochargeMoney()">
+      <div class="charging" style="margin:0;border-bottom:1px solid #eee;" @click="goRechargeRecord()">
         <div class="flex-le xx">
           <div class="wrap-img" style="display:flex;align-items: center;margin-right:10px;">
             <img src="../assets/充值记录.png" class="wallet">
@@ -49,17 +49,19 @@
           <i><img src="../assets/right.png" alt="" class="wallet"></i>
         </div>
       </div>
-      <!-- <div class="charging">
+      <div class="charging" style="margin:0;border-bottom:1px solid #eee;" @click="gochargeRecord()">
         <div class="flex-le xx">
-          <div style="margin-right:10px;"><img src="../assets/love.png" class="wallet"></div>
+          <div class="wrap-img" style="display:flex;align-items: center;margin-right:10px;">
+            <img src="../assets/love.png" class="wallet">
+          </div>
           <div>
-            <div class="color-3 font-28">我的收藏</div>
+            <div class="color-3 font-32">充电记录</div>
           </div>
         </div>
         <div class="flex-le">
           <i><img src="../assets/right.png" alt="" class="wallet"></i>
         </div>
-      </div> -->
+      </div>
       <div class="exit" @click="exit=true">
         退出登录
       </div>
@@ -91,8 +93,8 @@ export default {
   data() {
     return {
       aboutData: {
-        balance:0,
-        consume:0
+        balance: 0,
+        consume: 0
       },
       exit: false
     };
@@ -100,12 +102,13 @@ export default {
   methods: {
     logout() {
       //登出
+      var mp = this.$route.query.mp;
       this.$http
-        .post("/api/user/logout")
+        .post("/api/user/logout", { mp: mp })
         .then(
           function(res) {
             if (res.data.code == 0) {
-              location.href = "/api/login";
+              location.href = "/api/login?mp=" + mp;
             }
           }.bind(this)
         )
@@ -115,29 +118,42 @@ export default {
     },
     goCharging() {
       //充值
-      
+      var mp = this.$route.query.mp;
       this.$router.push({
-        name: "charging" 
+        name: "charging",
+        query: { mp: mp }
       });
     },
-    gochargeMoney() {
+    goRechargeRecord() {
+      var mp = this.$route.query.mp;
       //充值记录
       this.$router.push({
-        name: "chargeMoney"
+        name: "chargeMoney",
+        query: { mp: mp }
+      });
+    },
+    gochargeRecord(){
+      var mp = this.$route.query.mp;
+      //充值记录
+      this.$router.push({
+        name: "chargeEle",
+        query: { mp: mp }
       });
     },
     getApi() {
       var addr = this.$route.query.addr;
+      var mp = this.$route.query.mp;
       this.$http
         .post("/api/user/info", {
-          addr: addr
+          addr: addr,
+          mp: mp
         })
         .then(
           function(res) {
             if (res.data.code == 0) {
               this.aboutData = res.data.data;
             } else {
-               this.$msgbox("系统提醒",res.data.msg);
+              this.$msgbox(res.data.msg);
             }
           }.bind(this)
         )
@@ -148,7 +164,7 @@ export default {
   },
   created() {
     this.getApi();
-    document.title="个人中心"
+    document.title = "个人中心";
   },
   filters: {
     returnFloat(value) {
@@ -180,7 +196,7 @@ export default {
   color: #fff;
   text-align: center;
 }
-.selfCenter{
+.selfCenter {
   height: 100%;
   background: #2e2e2e;
 }
@@ -250,8 +266,8 @@ img {
 }
 .popup {
   width: 10rem;
-  height:100%;
-  background: rgba(0, 0, 0, .5);
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   position: absolute;
   top: 0;
   left: 0;
@@ -266,23 +282,23 @@ img {
   border-radius: 10px;
   position: relative;
 }
-.dispear{
+.dispear {
   position: absolute;
-  top:20px;
+  top: 20px;
   right: 20px;
 }
-.confirm{
+.confirm {
   text-align: center;
   font-size: 18px;
   margin-bottom: 10px;
 }
-.icons-img{
+.icons-img {
   border-radius: 59px;
 }
-.font-32{
+.font-32 {
   font-size: 32/75rem;
 }
-.font-24{
+.font-24 {
   font-size: 24/75rem;
 }
 </style>

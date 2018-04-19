@@ -9,14 +9,14 @@
       </group>
       <group>
         <x-input  type="number" placeholder="请输入验证码" class="weui-vcode" v-model="maskValue2" :disabled="check">
-             <span slot="right" @click="sendMessage" class="checkNubmber" :class="{ colorC: iscolorC }" >
+             <span slot="right" @click="debounceClick" class="checkNubmber" :class="{ colorC: iscolorC }" >
                {{word}}
               </span>
         </x-input>
       </group>
     </div>
     <div id="bottom">
-      <x-button type="primary" action-type="button" style="border-radius:99px;background:#4582ff;" @click.native="login()">登录</x-button>
+      <x-button type="primary" action-type="button" :disabled="disable001" style="border-radius:99px;background:#4582ff;" @click.native="login()">登录</x-button>
     </div>
     <group>
       <alert v-model="show" @on-show="onShow" @on-hide="onHide">请输入手机号和验证码！</alert>
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { debounce } from "../common/util.js";
 import { Group, XInput, XButton, Alert, XSwitch } from "vux";
 export default {
   components: {
@@ -44,7 +45,8 @@ export default {
       msgCode: "",
       iscolorC:false,
       check:true,
-      flag:false
+      flag:false,
+      disable001:false
     };
   },
   methods: {
@@ -69,9 +71,11 @@ export default {
             that.word = "获取验证码";
           }
         }, 1000);
+        var mp = this.$route.query.mp;
          this.$http
           .post("/api/user/msgCode", {
-            phone: this.maskValue1
+            phone: this.maskValue1,
+            mp:mp
           })
           .then(function(res) {
             // this.msgCode=res.data.msgCode;
@@ -82,26 +86,33 @@ export default {
       }
       }
     },
+     debounceClick: debounce(function(e) {
+        this.sendMessage();
+    }, 300),
     login() {
       if (this.maskValue1 == "" || this.maskValue2 == "") {
         this.show = true;
       } else {
+        this.disable001=true;
         var state = this.$route.query.state;
+        var mp = this.$route.query.mp;
         this.$http
           .post("/api/user/login", {
             phone: this.maskValue1,
             msgCode: this.maskValue2,
-            state: state
+            state: state,
+            mp:mp
           })
           .then(function(res) {
             if (res.data.code == 0) {
                if(state==undefined){
-                 location.href="/api/user";
+                 location.href="/api/user?mp="+mp;
                }else{
-                  location.href = state;                 
+                  location.href = state+"&mp="+mp;                 
                }
             } else {
-               this.$msgbox("系统提醒",res.data.msg);
+              this.disable001=false;
+              this.$msgbox(res.data.msg);
             }
           }.bind(this))
           .catch(function(err) {

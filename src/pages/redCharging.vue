@@ -1,16 +1,7 @@
 <template>
   <div class="demo">
     <div id="demo">
-      <div class="flex-two-red">
-        <div>
-          <i style="margin-right:10px;"><img :src="aboutData.tenantLogo" alt="" class="wallet"></i>{{aboutData.tenantName}}
-        </div>
-        <div>
-          <a :href="'tel:'+aboutData.tenantPhone">
-            <img src="../assets/phone.png" alt="" class="wallet">
-          </a>
-        </div>
-      </div>
+      <GoSelf :headerData="aboutData"></GoSelf>
       <div class="flex-center">
         <div>
           <div class="font-32" style="padding-top:10px;">{{aboutData.name}}</div>
@@ -20,17 +11,23 @@
       </div>
       <div class="flex-group">
         <div class="flex-item">
-          <div class="font-38 color-blue">{{aboutData.electricity|returnFloat}}<span class="font-24">度</span></div>
+          <div class="font-38 color-blue">{{aboutData.electricity|returnFloat}}
+            <span class="font-24">度</span>
+          </div>
           <div>
             <i class="icon"><img src="../assets/battary.png" alt=""></i>用电量</div>
         </div>
         <div class="flex-item">
-          <div class="font-38 color-blue">{{aboutData.duration}}<span class="font-24">分钟</span></div>
+          <div class="font-38 color-blue">{{aboutData.duration}}
+            <span class="font-24">分钟</span>
+          </div>
           <div>
             <i class="icon"><img src="../assets/时间.png" alt=""></i>充电时间</div>
         </div>
         <div class="flex-item">
-          <div class="font-38 color-blue">{{aboutData.consume|returnFloat}}<span class="font-24">元</span></div>
+          <div class="font-38 color-blue">{{aboutData.consume|returnFloat}}
+            <span class="font-24">元</span>
+          </div>
           <div>
             <i class="icon"><img src="../assets/金额.png" alt=""></i>消费金额</div>
         </div>
@@ -42,19 +39,23 @@
             <i class="icon"><img src="../assets/shiduan.png" alt=""></i>当前时段</div>
         </div>
         <div class="flex-item" style="border-bottom:0;">
-          <div class="font-32">{{aboutData.fee|returnFloat}}<span class="font-24">元</span></div>
+          <div class="font-32">{{aboutData.fee|returnFloat}}
+            <span class="font-24">元</span>
+          </div>
           <div>
             <i class="icon"><img src="../assets/dianjia.png" alt=""></i>电价(元/度)</div>
         </div>
         <div class="flex-item" style="border-bottom:0;">
-          <div class="font-32">{{aboutData.available|returnFloat}}<span class="font-24">元</span></div>
+          <div class="font-32">{{aboutData.available|returnFloat}}
+            <span class="font-24">元</span>
+          </div>
           <div>
             <i class="icon"><img src="../assets/zhanghuyue .png" alt=""></i>账户余额</div>
         </div>
       </div>
       <div class="bottom-radius">
         <div id="bottom-red" ref="endButton">
-          <x-button type="primary"  action-type="button" :disabled="end" style="border-radius:99px;background:#4582ff;" @click.native="endCharge()">{{endChargeText}}</x-button>
+          <x-button type="primary" action-type="button" :disabled="end" style="border-radius:99px;background:#4582ff;" @click.native="endCharge()">{{endChargeText}}</x-button>
         </div>
       </div>
     </div>
@@ -71,10 +72,10 @@
       </div>
     </div>
     <div id="shadow" style="background:#fff;width:100%;height:100%;position: absolute;left: 0px;top: 0px;">
-      <div  class="loader loader-ball is-active" shadow>
-          <div style="position:absolute;top: 50%;left: 50%;margin: 50px 0 0 -25px;" class="font-32">
-            加载中
-          </div>
+      <div class="loader loader-ball is-active" shadow>
+        <div style="position:absolute;top: 50%;left: 50%;margin: 50px 0 0 -25px;" class="font-32">
+          加载中
+        </div>
       </div>
     </div>
   </div>
@@ -83,12 +84,14 @@
 <script>
 import { Group, Cell, CellBox, XButton } from "vux";
 import water from "@/components/water";
+import GoSelf from "@/components/goSelf";
 export default {
   components: {
     Group,
     Cell,
     XButton,
-    water
+    water,
+    GoSelf
   },
   data() {
     return {
@@ -100,35 +103,29 @@ export default {
         feeType: 0,
         fee: 0,
         available: 0,
-        name:"",
-        tenantName:""
+        name: "",
+        tenantName: ""
       },
       addr: "",
       exit: false,
       hasData: false,
       number: null,
       noCharge: true,
-      flag:null,
-      endChargeText:"结束充电",
-      end:false
+      flag: null,
+      endChargeText: "结束充电",
+      end: false
     };
   },
   methods: {
     getApi() {
+      var mp = this.$route.query.mp;
       this.$http
-        .post("/api/charging/charging")
+        .post("/api/charging/charging", { mp: mp })
         .then(
           function(res) {
             if (res.data.code == 0) {
               if (res.data.data != null) {
-                  //timer中的逻辑，当有数据时返回 且hasData==false，1 hasData设置为true 2 关闭等待状态层 3 timer间隔设置为10s
-                if(this.hasData==false){
-                  this.hasData=true;
-                  //关闭状态等待层???
-                  document.getElementById("shadow").style.display="none";    
-                  clearInterval(intervalid1);
-                   window.intervalid1=setInterval(this.getApi,10000);
-                }
+                //timer中的逻辑，当有数据时返回 且hasData==false，1 hasData设置为true 2 关闭等待状态层 3 timer间隔设置为10s
                 this.aboutData = res.data.data;
                 this.addr = res.data.data.addr;
                 this.number = res.data.data.number;
@@ -138,27 +135,39 @@ export default {
                 ) {
                   this.aboutData.tenantLogo = "../static/recharge_logo.png";
                 }
+                if (this.hasData == false) {
+                  this.hasData = true;
+                  //关闭状态等待层???
+                  document.getElementById("shadow").style.display = "none";
+                  // if(intervalid1){
+                  //    clearInterval(intervalid1);
+                  // }
+                   setTimeout(this.getApi, 10000);
+                }
               }
-             
+              //-------------------------------------
               if (res.data.data == null) {
-                 //充电自动结束
-                if(this.hasData == true){
+                //充电自动结束
+                if (this.hasData == true) {
                   var number = this.number;
                   this.$router.push({
-                  name: "chargingFinish",
-                  query: { orderId: number }
+                    name: "chargingFinish",
+                    query: { orderId: number, mp: mp }
                   });
                   return;
                 }
-                document.getElementById("shadow").style.display="none";   
-                //显示无数据层
-                if (!this.flag) {                             
+                //第一次进来无数据
+                if(this.hasData==false){
+                  console.log("无数据")
+                }
+                //显示无数据层,直接点充电中的
+                if (!this.flag) {
+                  document.getElementById("shadow").style.display = "none";
                   this.exit = true;
                 }
               }
-
             } else {
-              this.$msgbox("系统提醒", res.data.msg);
+              this.$msgbox(res.data.msg);
             }
           }.bind(this)
         )
@@ -167,49 +176,63 @@ export default {
         });
     },
     endCharge() {
-     if(this.flag == "true"){
-        clearInterval(intervalid1);
-      }else{
-        clearInterval(intervalid2);
-      }
-      this.endChargeText="结束中..."
-      this.end=true
-      this.$refs.endButton.children[0].style.background="gray"
-      var addr = this.addr;
-      this.$http
-        .post("/api/charging/end", {
-          addr: addr
-        })
-        .then(
-          function(res) {
-            if (res.data.code == 0) {
-              var number = res.data.data;  //可能有问题
-              this.$router.push({
-                name: "chargingFinish",
-                query: { orderId: number }
+      var that = this;
+      this.$vux.confirm.show({
+        content: "确认结束充电？",
+        onCancel() {
+          console.log("plugin cancel");
+        },
+        onConfirm() {
+          if (that.flag == "true") {
+            clearInterval(intervalid1);
+          } else {
+            clearInterval(intervalid2);
+          }
+          if (that.addr) {
+            that.endChargeText = "结束中...";
+            that.end = true;
+            that.$refs.endButton.children[0].style.background = "gray";
+            var addr = that.addr;
+            var mp = that.$route.query.mp;
+            that.$http
+              .post("/api/charging/end", {
+                addr: addr,
+                mp: mp
+              })
+              .then(
+                function(res) {
+                  if (res.data.code == 0) {
+                    var number = res.data.data; //可能有问题
+                    that.$router.push({
+                      name: "chargingFinish",
+                      query: { orderId: number, mp: mp }
+                    });
+                  } else {
+                    that.$msgbox(res.data.msg);
+                  }
+                }.bind(that)
+              )
+              .catch(function(err) {
+                console.log(err);
               });
-            } else {
-              this.$msgbox("系统提醒", res.data.msg);
-            }
-          }.bind(this)
-        )
-        .catch(function(err) {
-          console.log(err);
-        });
+          }
+        }
+      });
     },
     start() {
       //启动计时
-      var timer=15;
+      var timer = 15;
       //从扫码充电进来查看充电订单
       this.flag = this.$route.query.flag;
       if (this.flag == "true") {
         //创建一个间隔2s的timer
-        window.intervalid1=setInterval(this.getApi,2000);
+        this.getApi();
+        window.intervalid1 = setInterval(this.getApi, 2000);
         //设置一个倒计时timeout，执行：hasData为false时 显示无结果状态层，把timer停止；hasData为true时，return
         setTimeout(() => {
-          if(this.hasData==false){
-             document.getElementById("demo").style.display="none";
-             document.getElementById("shadow").style.display="none";    
+          if (this.hasData == false) {
+            document.getElementById("demo").style.display = "none";
+            document.getElementById("shadow").style.display = "none";
             this.exit = true;
             clearInterval(intervalid1);
           }
@@ -226,11 +249,8 @@ export default {
     this.start();
   },
   beforeDestroy() {
-    if(this.flag == "true"){
-       clearInterval(intervalid1);
-    }else{
+      clearInterval(intervalid1);
       clearInterval(intervalid2);
-    }
   },
   filters: {
     returnFloat(value) {
@@ -292,17 +312,6 @@ input[type="range"]::after {
 .bottom-radius {
   background-image: url("../assets/bottom.png");
   background-size: 100% 100%;
-}
-.flex-two-red {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 30px;
-  font-size: 0.37rem;
-  height: 1.33rem;
-  line-height: 1.33rem;
-  background: #fff;
-  margin-bottom: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 .flex-group {
   display: flex;

@@ -12,7 +12,6 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
          '/api': { //这里是我配置的名字
-// 　　　　  target: 'http://172.16.0.111:80/api', 
 　　　　 target: 'https://easy-mock.com/mock/5a607035ee3b5361a3430b18/example', 
 　　　　 changeOrigin: true, //开启代理
  　　　　pathRewrite: { 

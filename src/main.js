@@ -11,8 +11,9 @@ import '@/common/css-loader.css'
 import axios from 'axios'
 import Vuex from 'vuex'
 import moment from 'moment';
-import { AlertPlugin} from 'vux'
+import { AlertPlugin, ConfirmPlugin} from 'vux'
 Vue.use(AlertPlugin);
+Vue.use(ConfirmPlugin);
 moment.locale('zh-cn');
 Vue.use(Vuex)
 import qs from 'qs';
@@ -71,9 +72,8 @@ axios.interceptors.response.use(function (response) {
   return Promise.reject(error);
 });
 
-Vue.prototype.$msgbox = function (title,msg) {
+Vue.prototype.$msgbox = function (msg) {
   this.$vux.alert.show({
-    title:title,
     content: msg
   });
 }
