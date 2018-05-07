@@ -190,7 +190,7 @@ export default {
   },
   created() {
     this.getApi();
-    document.title="充电详情";
+    // document.title="充电详情";
   },
   filters: {
     returnFloat(value) {

@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="charging" style="margin-bottom:8px;">
-        <div class="flex-le">
+        <div class="flex-le" @click="goRechargeRecord">
           <div class="wrap-img" style="display:flex;align-items: center;"><img src="../assets/钱包.png" class="wallet"></div>
           <div class="wrap-img">
             <div class="color-3">{{aboutData.accountAvailable|returnFloat}}</div>
@@ -42,7 +42,7 @@
             <img src="../assets/充值记录.png" class="wallet">
           </div>
           <div>
-            <div class="color-3 font-32">充值记录</div>
+            <div class="color-3 font-32">账户记录</div>
           </div>
         </div>
         <div class="flex-le">
@@ -133,7 +133,7 @@ export default {
       });
     },
     gochargeRecord(){
-      var mp = this.$route.query.mp;
+      // var mp = this.$route.query.mp;
       //充值记录
       this.$router.push({
         name: "chargeEle",

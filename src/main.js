@@ -17,11 +17,9 @@ Vue.use(ConfirmPlugin);
 moment.locale('zh-cn');
 Vue.use(Vuex)
 import qs from 'qs';
-// axios.defaults.baseURL = 'http://172.16.0.111:8080/'
 
 Vue.prototype.$http = axios
 Vue.prototype.$moment = moment;
-// Vue.use(require('vue-wechat-title'))
 FastClick.attach(document.body)
 
 Vue.config.productionTip = false
@@ -44,6 +42,7 @@ store.registerModule('vux', { // 名字自己定义
 })
 
 router.beforeEach(function (to, from, next) {
+  document.title = to.meta.title;
   store.commit('updateLoadingStatus', {isLoading: true})
   next()
 })

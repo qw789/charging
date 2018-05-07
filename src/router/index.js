@@ -19,7 +19,7 @@ export default new Router({
       path: '/chargeMoney',
       name: 'chargeMoney',
       component: chargeMoney,
-      meta:{title:"充值记录"}
+      meta:{title:"账户记录"}
     },
     {
      path: '/chargeEle',
@@ -74,6 +74,10 @@ export default new Router({
       name: 'chargingFinish',
       component: chargingFinish,
       meta: {title: "充电详情"}
+    },
+    {
+      path: '/',
+      meta: { title: "国投智能充" }
     }
   ]
 })

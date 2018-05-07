@@ -55,7 +55,12 @@
       </div>
       <div class="bottom-radius">
         <div id="bottom-red" ref="endButton">
-          <x-button type="primary" action-type="button" :disabled="end" style="border-radius:99px;background:#4582ff;" @click.native="endCharge()">{{endChargeText}}</x-button>
+          <x-button type="primary" 
+            action-type="button" 
+            :disabled="end" 
+            style="border-radius:50px;background:#4582ff;width:auto;"
+            @click.native="endCharge()">{{endChargeText}}
+          </x-button>
         </div>
       </div>
     </div>
@@ -71,12 +76,20 @@
         </div>
       </div>
     </div>
-    <div id="shadow" style="background:#fff;width:100%;height:100%;position: absolute;left: 0px;top: 0px;">
+    <div id="shadow" style="background:#fff;width:100%;height:100%;position: absolute;left: 0px;top: 0px;z-index:10;">
       <div class="loader loader-ball is-active" shadow>
         <div style="position:absolute;top: 50%;left: 50%;margin: 50px 0 0 -25px;" class="font-32">
           加载中
         </div>
       </div>
+    </div>
+    <div id="sidebar">
+      <ul>
+        <li class="totalOrder">我的订单</li>
+        <li v-for='(item,index) in mutileCharge' :key="index" @click="toggleData(item)" :class="{active: activeName == item.addr}">
+          {{item.addr}}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -113,14 +126,18 @@ export default {
       noCharge: true,
       flag: null,
       endChargeText: "结束充电",
-      end: false
+      end: false,
+      mutileCharge:[],
+      activeName:'',
+      chargingLength:'',
+      chargingIndex:''
     };
   },
   methods: {
     getApi() {
       var mp = this.$route.query.mp;
       this.$http
-        .post("/api/charging/charging", { mp: mp })
+        .post("/api/charging/charging", { mp: mp,addr:this.chargingIndex })
         .then(
           function(res) {
             if (res.data.code == 0) {
@@ -175,13 +192,32 @@ export default {
           console.log(err);
         });
     },
+    chargingList(){
+       var mp = this.$route.query.mp;
+      this.$http
+        .post("/api/charging/chargingList", { mp: mp })
+        .then(res=>{
+          //如果列表<=1，不用显示列表
+         if(res.data.data && res.data.data.length){
+           this.mutileCharge=res.data.data;
+           this.chargingLength=res.data.data.length;
+           if(!this.$route.query.addr){
+            this.chargingIndex=this.mutileCharge[0].addr;
+            this.activeName=this.mutileCharge[0].addr;
+            } 
+            if(this.chargingLength>1){
+              document.querySelector("#sidebar").style.display='block';
+              document.querySelector("#demo").style.paddingLeft="75px";
+            }
+         }
+          
+          this.start();
+        })
+    },
     endCharge() {
       var that = this;
       this.$vux.confirm.show({
         content: "确认结束充电？",
-        onCancel() {
-          console.log("plugin cancel");
-        },
         onConfirm() {
           if (that.flag == "true") {
             clearInterval(intervalid1);
@@ -242,11 +278,26 @@ export default {
         this.getApi();
         window.intervalid2 = setInterval(this.getApi, 10000);
       }
+    },
+    toggleData(item){
+      this.activeName = item.addr;
+      this.chargingIndex=item.addr;
+      this.getApi();
     }
   },
   created() {
-    document.title = "正在充电";
-    this.start();
+    this.chargingList();   
+  },
+  mounted(){
+    var chargingCount=this.$route.query.chargingCount;
+    if(chargingCount>1){
+      document.querySelector("#sidebar").style.display='block';
+      document.querySelector("#demo").style.paddingLeft="75px";
+    }
+     if(this.$route.query.addr){
+        this.chargingIndex=this.$route.query.addr;
+        this.activeName=this.$route.query.addr;
+      }
   },
   beforeDestroy() {
       clearInterval(intervalid1);
@@ -315,7 +366,8 @@ input[type="range"]::after {
 }
 .flex-group {
   display: flex;
-  padding: 0 40px;
+  justify-content: center;
+  padding: 0 0.2rem;
   font-size: 0.37rem;
   background: #fff;
 }
@@ -437,13 +489,14 @@ input[type="range"]::after {
   width: 24/75rem;
   height: 24/75rem;
   margin-right: 5px;
+  vertical-align: middle;
 }
 .icon img {
   width: 100%;
   height: 100%;
 }
 #bottom-red {
-  padding: 0.5rem 220/75rem;
+  padding: 0.5rem 0;
 }
 .popup {
   width: 10rem;
@@ -463,5 +516,42 @@ input[type="range"]::after {
 }
 .content div {
   font-size: 30/75rem;
+}
+#sidebar{
+  position: absolute;
+  left: 0;
+  top:0;
+  font-size:0.4rem;
+  height: 100%;
+  display: none;
+}
+#sidebar ul{
+  height: 100%;
+  background: #f2f2f2;
+  overflow: scroll;
+}
+#sidebar li{
+  height: 45px;
+  line-height: 45px;
+  background: #f2f2f2;
+  text-align: center;
+  border-bottom: 1px solid #fff;
+  color:#fff;
+  padding:0 10px;
+  color: #999;
+}
+#sidebar li.active{
+  background: #fff;
+  border-left: 3px solid #4582ff;
+  color:#4582ff;
+}
+#sidebar li.totalOrder{
+  height: 1.53rem;
+  line-height: 1.53rem;
+  color:#999;
+  background: #f2f2f2;
+}
+.flex-item div:nth-child(2){
+  font-size: 0.25rem;
 }
 </style>

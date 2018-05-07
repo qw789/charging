@@ -140,7 +140,7 @@ export default {
       },
   },
    created() {
-    document.title="充值";
+    // document.title="充值";
   },
   mounted(){
     document.getElementById("number").addEventListener("input",function(event){

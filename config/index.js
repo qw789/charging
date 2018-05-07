@@ -13,6 +13,7 @@ module.exports = {
     proxyTable: {
          '/api': { //这里是我配置的名字
 　　　　 target: 'https://easy-mock.com/mock/5a607035ee3b5361a3430b18/example', 
+        // target: 'http://172.16.0.194:8766', 
 　　　　 changeOrigin: true, //开启代理
  　　　　pathRewrite: { 
                  '^/api': ''
@@ -21,7 +22,7 @@ module.exports = {
     },
 
     // Various Dev Server settings
-    host: 'localhost', // can be overwritten by process.env.HOST
+    host: '172.16.0.157', // can be overwritten by process.env.HOST
     port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,

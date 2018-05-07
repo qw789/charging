@@ -67,7 +67,7 @@
     </div>
     <div class="bottom2" v-if="aboutData.hasLogin==true && aboutData.chargingCount!=0">
       <div>
-        您已有一个正在充电的订单
+        您已有{{aboutData.chargingCount}}个正在充电的订单
       </div>
       <div @click="checkOrder()">
         查看
@@ -153,9 +153,13 @@ export default {
                 }
                 if (this.aboutData.chargingCount != 0) {
                   //有订单，跳转到充电中
-                  if (this.aboutData.chargingAddr == addr) {
-                    location.href = "/api/chargingView?mp=" + mp;
-                  }
+                      if(this.aboutData.chargingAddr.indexOf(addr) >-1) {
+                        //  this.$router.push({
+                        //     name: "redCharging",
+                        //     query: { mp: mp,addr:addr,chargingCount:this.aboutData.chargingCount}
+                        //   });
+                      location.href = "/api/chargingView?mp=" + mp+"&addr="+addr+"&chargingCount="+this.aboutData.chargingCount;
+                    }
                   this.grayBack = true;
                 } else {
                   //是否可用
@@ -229,9 +233,6 @@ export default {
     debounceClick: debounce(function(e) {
       this.gologin();
     }, 300),
-    // debounceClick(){
-    //   this.gologin();
-    // },
     goRecharge() {
       var addr = this.$route.query.addr;
       var mp = this.$route.query.mp;
@@ -243,15 +244,15 @@ export default {
     },
     checkOrder() {
       var mp = this.$route.query.mp;
-      var addr = this.$route.query.addr;
+      // var addr = this.$route.query.addr;
       this.$router.push({
         name: "redCharging",
-        query: { mp: mp, addr: addr }
+        query: { mp: mp}
       });
     }
   },
   created() {
-    document.title = "扫码充电";
+    // document.title = "扫码充电";
     this.getApi();
   },
   beforeDestroy() {

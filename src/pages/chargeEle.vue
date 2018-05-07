@@ -144,7 +144,7 @@ export default {
     }
   },
  created() {
-    document.title="充电记录";
+    // document.title="充电记录";
   }
 };
 </script>

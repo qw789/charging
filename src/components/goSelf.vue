@@ -47,7 +47,7 @@ export default {
   justify-content: space-between;
   padding: 0 25px;
   font-size: 0.37rem;
-  margin-bottom: 10px;
+  margin-bottom: 0.2rem;
   background: #fff;
   height: 1.33rem;
   line-height: 1.33rem;

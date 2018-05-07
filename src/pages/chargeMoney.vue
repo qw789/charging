@@ -4,11 +4,11 @@
       <div>
         <ul class="flex-group" v-for="item in list" :key="item.id">
           <li class="flex-item">
-            <div class="font-w">{{item.state|sucessOrFail}}</div>
+            <div style="font-size:0;"><span class="font-w" >{{item.bizType|returnType}}</span><span class="colorGray">{{item.remark}}</span></div>
             <div class="kwh">{{item.updated}}</div>
           </li>
           <li class="flex-item-right">
-            <div class="colorBlue">￥{{item.money|returnFloat}}</div>
+            <div class="colorBlue" :class="{colorRed:(item.bizType==1||item.bizType==5||item.bizType==7||item.bizType==8||item.bizType==9)}">{{item.bizType|returnMark}}{{item.money|returnFloat}}</div>
             <div class="kwh">余额&nbsp;{{item.balanceAfter|returnFloat}}</div>
           </li>
         </ul>
@@ -118,10 +118,88 @@ export default {
       if (value) {
         return "充值成功";
       } 
+    },
+    returnType(value){
+      switch (value) {
+        case 1:
+          return "充值"
+          break;
+       case 2:
+          return "提现"
+          break;
+       case 3:
+          return "退还"
+          break;
+       case 4:
+          return "消费"
+          break;
+       case 5:
+          return "调入"
+          break;
+       case 6:
+          return "清零"
+          break;
+       case 7:
+          return "返奖"
+          break;
+       case 8:
+          return "销售收入"
+          break;
+       case 9:
+          return "退来"
+          break;
+       case 10:
+          return "借贷"
+          break;
+       case 11:
+          return "调出"
+          break;
+        default:
+          break;
+      }
+    },
+     returnMark(value){
+      switch (value) {
+        case 1:
+          return "+"
+          break;
+       case 2:
+          return "-"
+          break;
+       case 3:
+          return "-"
+          break;
+       case 4:
+          return "-"
+          break;
+       case 5:
+          return "+"
+          break;
+       case 6:
+          return "-"
+          break;
+       case 7:
+          return "+"
+          break;
+       case 8:
+          return "+"
+          break;
+       case 9:
+          return "+"
+          break;
+       case 10:
+          return "-"
+          break;
+       case 11:
+          return "-"
+          break;
+        default:
+          break;
+      }
     }
   },
   created() {
-    document.title="充值记录";
+    // document.title="充值记录";
   }
 };
 </script>
@@ -131,6 +209,7 @@ ul,
 li {
   list-style: none;
 }
+
 .vux-demo {
   text-align: center;
   background: #fff;
@@ -167,7 +246,6 @@ li {
   color: #999;
 }
 .colorBlue {
-  color: #4582ff;
   font-size: 32/75rem;
 }
 .flex-middel {
@@ -181,5 +259,20 @@ li {
   text-align: center;
   font-size: 18px;
    margin-top: 50px;
+}
+.colorGray{
+  color:#999;
+  width: 260/75rem;  
+  font-size: 28/75rem;
+  margin-left: 10px;
+  overflow: hidden;
+  text-overflow:ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: -22%;
+}
+.colorRed{
+  color: red;
+  font-size: 32/75rem;
 }
 </style>
