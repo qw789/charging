@@ -67,7 +67,7 @@ export default new Router({
      path: '/redCharging',
       name: 'redCharging',
       component:redCharging,
-      meta: {title: "正在充电"}
+      meta: {title: "我的充电"}
     },
     {
       path: '/chargingFinish',

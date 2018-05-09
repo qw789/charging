@@ -154,18 +154,6 @@ export default {
             }
             //-------------------------------------
             if (!res.data.data) {
-              //进来没数据给默认值
-              this.aboutData = {
-                carElectricity: 0,
-                electricity: 0,
-                duration: 0,
-                consume: 0,
-                feeType: 0,
-                fee: 0,
-                available: 0,
-                name: "",
-                tenantName: ""
-              };
               //充电自动结束
               if (this.hasData[chargingIndex] == true) {
                 var number = this.number;
@@ -176,13 +164,13 @@ export default {
                 return;
               }
               //第一次进来无数据
-              if (!this.hasData[chargingIndex]) {
-                console.log("无数据");
-              }
+              // if (!this.hasData[chargingIndex]) {
+              //   console.log("无数据");
+              // }
               //显示无数据层,直接点充电中的
               if (!this.flag) {
                 this.$store.commit("waitingControl", { isShadowing: false });
-                this.$store.commit("noDataPopup", { isShadowing: true });
+                this.$store.commit("noDataControl", { noDataPopup: true });
               }
             }
           } else {
@@ -269,7 +257,7 @@ export default {
           if (!this.hasData[this.chargingIndex]) {
             document.getElementById("demo").style.display = "none";
             this.$store.commit("waitingControl", { isShadowing: false });
-            this.$store.commit("noDataPopup", { isShadowing: true });
+            this.$store.commit("noDataControl", { noDataPopup: true });
             clearInterval(intervalid1);
           }
         }, 20000);
