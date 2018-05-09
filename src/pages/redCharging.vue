@@ -55,34 +55,13 @@
       </div>
       <div class="bottom-radius">
         <div id="bottom-red" ref="endButton">
-          <x-button type="primary" 
-            action-type="button" 
-            :disabled="end" 
-            style="border-radius:50px;background:#4582ff;width:auto;"
-            @click.native="endCharge()">{{endChargeText}}
+          <x-button type="primary" action-type="button" :disabled="end" style="border-radius:50px;background:#4582ff;width:auto;" @click.native="endCharge()">{{endChargeText}}
           </x-button>
         </div>
       </div>
     </div>
-    <div class="popup" v-show="exit">
-      <div class="content">
-        <div style="padding:30px;">
-          <div class="flex-center" style="padding-top:150px;">
-            <img src="../assets/chongzhishibai.png" height="118" width="118" alt="">
-          </div>
-          <div style="text-align:center;padding-top:30px;">
-            您没有正在充电的订单
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="shadow" style="background:#fff;width:100%;height:100%;position: absolute;left: 0px;top: 0px;z-index:10;">
-      <div class="loader loader-ball is-active" shadow>
-        <div style="position:absolute;top: 50%;left: 50%;margin: 50px 0 0 -25px;" class="font-32">
-          加载中
-        </div>
-      </div>
-    </div>
+    <Shadow v-if="isShadowing"></Shadow>
+    <OrderVoid v-if="noDataPopup"></OrderVoid>
     <div id="sidebar">
       <ul>
         <li class="totalOrder">我的订单</li>
@@ -96,6 +75,9 @@
 
 <script>
 import { Group, Cell, CellBox, XButton } from "vux";
+import { mapState } from "vuex";
+import Shadow from "@/components/shadow.vue";
+import OrderVoid from "@/components/orderVoid.vue";
 import water from "@/components/water";
 import GoSelf from "@/components/goSelf";
 export default {
@@ -104,7 +86,9 @@ export default {
     Cell,
     XButton,
     water,
-    GoSelf
+    GoSelf,
+    Shadow,
+    OrderVoid
   },
   data() {
     return {
@@ -120,99 +104,115 @@ export default {
         tenantName: ""
       },
       addr: "",
-      exit: false,
-      hasData: false,
+      hasData: {},
       number: null,
       noCharge: true,
       flag: null,
       endChargeText: "结束充电",
       end: false,
-      mutileCharge:[],
-      activeName:'',
-      chargingLength:'',
-      chargingIndex:''
+      mutileCharge: [],
+      activeName: "",
+      chargingLength: "",
+      chargingIndex: ""
     };
+  },
+  computed: {
+    ...mapState({
+      isShadowing: state => state.isShadowing,
+      noDataPopup: state => state.noDataPopup
+    })
   },
   methods: {
     getApi() {
       var mp = this.$route.query.mp;
+      var chargingIndex = this.chargingIndex;
       this.$http
-        .post("/api/charging/charging", { mp: mp,addr:this.chargingIndex })
-        .then(
-          function(res) {
-            if (res.data.code == 0) {
-              if (res.data.data != null) {
-                //timer中的逻辑，当有数据时返回 且hasData==false，1 hasData设置为true 2 关闭等待状态层 3 timer间隔设置为10s
-                this.aboutData = res.data.data;
-                this.addr = res.data.data.addr;
-                this.number = res.data.data.number;
-                if (
-                  this.aboutData.tenantLogo == "" ||
-                  this.aboutData.tenantLogo == null
-                ) {
-                  this.aboutData.tenantLogo = "../static/recharge_logo.png";
-                }
-                if (this.hasData == false) {
-                  this.hasData = true;
-                  //关闭状态等待层???
-                  document.getElementById("shadow").style.display = "none";
-                  // if(intervalid1){
-                  //    clearInterval(intervalid1);
-                  // }
-                   setTimeout(this.getApi, 10000);
-                }
+        .post("/api/charging/charging", { mp: mp, addr: chargingIndex })
+        .then(res => {
+          if (res.data.code == 0) {
+            this.$store.commit("updateLoadingStatus", { isLoading: false });
+            if (res.data.data) {
+              //timer中的逻辑，当有数据时返回 且hasData==false，1 hasData设置为true 2 关闭等待状态层 3 timer间隔设置为10s
+              this.aboutData = res.data.data;
+              this.addr = res.data.data.addr;
+              this.number = res.data.data.number;
+              if (!this.aboutData.tenantLogo) {
+                this.aboutData.tenantLogo = "../static/recharge_logo.png";
               }
-              //-------------------------------------
-              if (res.data.data == null) {
-                //充电自动结束
-                if (this.hasData == true) {
-                  var number = this.number;
-                  this.$router.push({
-                    name: "chargingFinish",
-                    query: { orderId: number, mp: mp }
-                  });
-                  return;
+              //如果这个桩有数据后，把他的hasData设为true
+              if (!this.hasData[chargingIndex]) {
+                this.hasData[chargingIndex] = true;
+
+                //关闭状态等待层???
+                this.$store.commit("waitingControl", { isShadowing: false });
+                //停止从扫码充电进来请求数据的定时器
+                if (window.intervalid1) {
+                  clearInterval(intervalid1);
                 }
-                //第一次进来无数据
-                if(this.hasData==false){
-                  console.log("无数据")
-                }
-                //显示无数据层,直接点充电中的
-                if (!this.flag) {
-                  document.getElementById("shadow").style.display = "none";
-                  this.exit = true;
-                }
+                window.intervalid1 = setInterval(this.getApi, 10000);
               }
-            } else {
-              this.$msgbox(res.data.msg);
             }
-          }.bind(this)
-        )
+            //-------------------------------------
+            if (!res.data.data) {
+              //进来没数据给默认值
+              this.aboutData = {
+                carElectricity: 0,
+                electricity: 0,
+                duration: 0,
+                consume: 0,
+                feeType: 0,
+                fee: 0,
+                available: 0,
+                name: "",
+                tenantName: ""
+              };
+              //充电自动结束
+              if (this.hasData[chargingIndex] == true) {
+                var number = this.number;
+                this.$router.push({
+                  name: "chargingFinish",
+                  query: { orderId: number, mp: mp, addr: chargingIndex }
+                });
+                return;
+              }
+              //第一次进来无数据
+              if (!this.hasData[chargingIndex]) {
+                console.log("无数据");
+              }
+              //显示无数据层,直接点充电中的
+              if (!this.flag) {
+                this.$store.commit("waitingControl", { isShadowing: false });
+                this.$store.commit("noDataPopup", { isShadowing: true });
+              }
+            }
+          } else {
+            this.$msgbox(res.data.msg);
+          }
+        })
         .catch(function(err) {
           console.log(err);
         });
     },
-    chargingList(){
-       var mp = this.$route.query.mp;
-      this.$http
-        .post("/api/charging/chargingList", { mp: mp })
-        .then(res=>{
-          //如果列表<=1，不用显示列表
-         if(res.data.data && res.data.data.length){
-           this.mutileCharge=res.data.data;
-           this.chargingLength=res.data.data.length;
-           if(!this.$route.query.addr){
-            this.chargingIndex=this.mutileCharge[0].addr;
-            this.activeName=this.mutileCharge[0].addr;
-            } 
-            if(this.chargingLength>1){
-              document.querySelector("#sidebar").style.display='block';
-              document.querySelector("#demo").style.paddingLeft="75px";
+    chargingList() {
+      var mp = this.$route.query.mp;
+      this.$http.post("/api/charging/chargingList", { mp: mp }).then(res => {
+        //箭头函数绑定的是父级作用域的上下文及vue实例
+        //如果列表<=1，不用显示列表
+        if (res.data.data && res.data.data.length) {
+          this.mutileCharge = res.data.data;
+          this.chargingLength = res.data.data.length;
+          if (this.chargingLength > 1) {
+            document.querySelector("#sidebar").style.display = "block";
+            document.querySelector("#demo").style.paddingLeft = "75px";
+            //没有指定addr 取第一个
+            if (!this.$route.query.addr) {
+              this.chargingIndex = this.mutileCharge[0].addr;
+              this.activeName = this.mutileCharge[0].addr;
             }
-         }
-          
-          this.start();
-        })
+          }
+        }
+        this.start();
+      });
     },
     endCharge() {
       var that = this;
@@ -266,10 +266,10 @@ export default {
         window.intervalid1 = setInterval(this.getApi, 2000);
         //设置一个倒计时timeout，执行：hasData为false时 显示无结果状态层，把timer停止；hasData为true时，return
         setTimeout(() => {
-          if (this.hasData == false) {
+          if (!this.hasData[this.chargingIndex]) {
             document.getElementById("demo").style.display = "none";
-            document.getElementById("shadow").style.display = "none";
-            this.exit = true;
+            this.$store.commit("waitingControl", { isShadowing: false });
+            this.$store.commit("noDataPopup", { isShadowing: true });
             clearInterval(intervalid1);
           }
         }, 20000);
@@ -279,29 +279,31 @@ export default {
         window.intervalid2 = setInterval(this.getApi, 10000);
       }
     },
-    toggleData(item){
+    toggleData(item) {
+      this.$store.commit("updateLoadingStatus", { isLoading: true });
       this.activeName = item.addr;
-      this.chargingIndex=item.addr;
+      this.chargingIndex = item.addr;
       this.getApi();
     }
   },
   created() {
-    this.chargingList();   
+    // this.chargingList();
   },
-  mounted(){
-    var chargingCount=this.$route.query.chargingCount;
-    if(chargingCount>1){
-      document.querySelector("#sidebar").style.display='block';
-      document.querySelector("#demo").style.paddingLeft="75px";
+  mounted() {
+    var chargingCount = this.$route.query.chargingCount;
+    if (chargingCount > 1) {
+      document.querySelector("#sidebar").style.display = "block";
+      document.querySelector("#demo").style.paddingLeft = "75px";
     }
-     if(this.$route.query.addr){
-        this.chargingIndex=this.$route.query.addr;
-        this.activeName=this.$route.query.addr;
-      }
+    if (this.$route.query.addr) {
+      this.chargingIndex = this.$route.query.addr;
+      this.activeName = this.$route.query.addr;
+    }
+    this.chargingList();
   },
   beforeDestroy() {
-      clearInterval(intervalid1);
-      clearInterval(intervalid2);
+    clearInterval(intervalid1);
+    clearInterval(intervalid2);
   },
   filters: {
     returnFloat(value) {
@@ -498,60 +500,42 @@ input[type="range"]::after {
 #bottom-red {
   padding: 0.5rem 0;
 }
-.popup {
-  width: 10rem;
-  height: 100%;
-  background: #fff;
+
+#sidebar {
   position: absolute;
+  left: 0;
   top: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-.content {
-  width: 700/75rem;
-  background: #fff;
-  border-radius: 10px;
-}
-.content div {
-  font-size: 30/75rem;
-}
-#sidebar{
-  position: absolute;
-  left: 0;
-  top:0;
-  font-size:0.4rem;
+  font-size: 0.4rem;
   height: 100%;
   display: none;
 }
-#sidebar ul{
+#sidebar ul {
   height: 100%;
   background: #f2f2f2;
   overflow: scroll;
 }
-#sidebar li{
+#sidebar li {
   height: 45px;
   line-height: 45px;
   background: #f2f2f2;
   text-align: center;
   border-bottom: 1px solid #fff;
-  color:#fff;
-  padding:0 10px;
+  color: #fff;
+  padding: 0 10px;
   color: #999;
 }
-#sidebar li.active{
+#sidebar li.active {
   background: #fff;
   border-left: 3px solid #4582ff;
-  color:#4582ff;
+  color: #4582ff;
 }
-#sidebar li.totalOrder{
+#sidebar li.totalOrder {
   height: 1.53rem;
   line-height: 1.53rem;
-  color:#999;
+  color: #999;
   background: #f2f2f2;
 }
-.flex-item div:nth-child(2){
+.flex-item div:nth-child(2) {
   font-size: 0.25rem;
 }
 </style>

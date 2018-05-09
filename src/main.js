@@ -17,7 +17,6 @@ Vue.use(ConfirmPlugin);
 moment.locale('zh-cn');
 Vue.use(Vuex)
 import qs from 'qs';
-
 Vue.prototype.$http = axios
 Vue.prototype.$moment = moment;
 FastClick.attach(document.body)
@@ -26,8 +25,17 @@ Vue.config.productionTip = false
 
 const store = new Vuex.Store({
 	state:{
-		openid:111
-	}
+    isShadowing:true,
+    noDataPopup:false
+  },
+  mutations:{
+    waitingControl(state, payload){
+      state.isShadowing = payload.isShadowing;
+    },
+    noDataControl(state, payload){
+      state.noDataPopup = payload.noDataPopup;
+    }
+  }
 }) // 这里你可能已经有其他 module
 
 store.registerModule('vux', { // 名字自己定义

@@ -153,14 +153,14 @@ export default {
                 }
                 if (this.aboutData.chargingCount != 0) {
                   //有订单，跳转到充电中
+                      var flag=true;
                       if(this.aboutData.chargingAddr.indexOf(addr) >-1) {
-                        //  this.$router.push({
-                        //     name: "redCharging",
-                        //     query: { mp: mp,addr:addr,chargingCount:this.aboutData.chargingCount}
-                        //   });
-                      location.href = "/api/chargingView?mp=" + mp+"&addr="+addr+"&chargingCount="+this.aboutData.chargingCount;
+                         this.$router.push({
+                            name: "redCharging",
+                            query: { mp: mp,addr:addr,chargingCount:this.aboutData.chargingCount,flag:flag}
+                          });
                     }
-                  this.grayBack = true;
+                  // this.grayBack = true;
                 } else {
                   //是否可用
                     if (
@@ -200,7 +200,6 @@ export default {
     gologin() {
       var addr = this.$route.query.addr;
       var mp = this.$route.query.mp;
-      if (this.aboutData.chargingCount == 0) {
         if (this.aboutData.status == 1 || this.aboutData.status == 5 || this.aboutData.status == 0 ) {
           if (this.aboutData.hasLogin == false) {
             location.href =
@@ -217,7 +216,11 @@ export default {
               .then(
                 function(res) {
                   if (res.data.code == 0) {
-                    location.href = "/api/chargingView?flag=true&mp=" + mp;
+                    var flag=true;
+                     this.$router.push({
+                      name: "redCharging",
+                      query: { mp: mp, addr: addr,flag:flag,chargingCount:this.aboutData.chargingCount}
+                    });
                   } else {
                     this.$msgbox(res.data.msg);
                   }
@@ -228,7 +231,6 @@ export default {
               });
           }
         }
-      }
     },
     debounceClick: debounce(function(e) {
       this.gologin();

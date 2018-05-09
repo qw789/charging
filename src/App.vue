@@ -8,7 +8,6 @@
 <script>
 import { Loading } from 'vux'
 import { mapState } from 'vuex'
-
 export default {
   name: 'app',
   components: {

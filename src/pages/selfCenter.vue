@@ -149,13 +149,13 @@ export default {
           mp: mp
         })
         .then(
-          function(res) {
-            if (res.data.code == 0) {
+          (res)=>{
+             if (res.data.code == 0) {
               this.aboutData = res.data.data;
             } else {
               this.$msgbox(res.data.msg);
             }
-          }.bind(this)
+          }
         )
         .catch(function(err) {
           console.log(err);

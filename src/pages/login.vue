@@ -95,7 +95,7 @@ export default {
       } else {
         this.disable001=true;
         var state = this.$route.query.state;
-        var mp = this.$route.query.mp;
+        var mp = this.$route.query.mp;  
         this.$http
           .post("/api/user/login", {
             phone: this.maskValue1,
@@ -105,7 +105,7 @@ export default {
           })
           .then(function(res) {
             if (res.data.code == 0) {
-               if(state==undefined){
+               if(!state){
                  location.href="/api/user?mp="+mp;
                }else{
                   location.href = state+"&mp="+mp;                 
