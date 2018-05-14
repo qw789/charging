@@ -77,8 +77,8 @@ export default {
             phone: this.maskValue1,
             mp:mp
           })
-          .then(function(res) {
-            // this.msgCode=res.data.msgCode;
+          .then(res=>{
+            this.$vux.toast.text('验证码已发送', 'middle')
           })
           .catch(function(err) {
             console.log(err);
@@ -139,7 +139,6 @@ export default {
     }
   },
    created() {
-    //  document.title="登录";
   }
 };
 </script>

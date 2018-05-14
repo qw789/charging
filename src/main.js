@@ -11,9 +11,10 @@ import '@/common/css-loader.css'
 import axios from 'axios'
 import Vuex from 'vuex'
 import moment from 'moment';
-import { AlertPlugin, ConfirmPlugin} from 'vux'
+import { AlertPlugin, ConfirmPlugin, ToastPlugin } from 'vux'
 Vue.use(AlertPlugin);
 Vue.use(ConfirmPlugin);
+Vue.use(ToastPlugin);
 moment.locale('zh-cn');
 Vue.use(Vuex)
 import qs from 'qs';

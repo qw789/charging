@@ -223,7 +223,7 @@ export default {
         ) {
           if (this.aboutData.hasLogin == false) {
             location.href =
-              "/api/login?state=http://xpc.vipgz1.idcfengye.com/api/scanCharge?addr=" +
+              "/api/login?state=http://cp.gtcx-tech.com/api/scanCharge?addr=" +
               addr +
               "&mp=" +
               mp;
@@ -272,7 +272,6 @@ export default {
     },
     checkOrder() {
       var mp = this.$route.query.mp;
-      // var addr = this.$route.query.addr;
       this.$router.push({
         name: "redCharging",
         query: { mp: mp }
@@ -280,7 +279,6 @@ export default {
     }
   },
   created() {
-    // document.title = "扫码充电";
     this.getApi();
   },
   beforeDestroy() {
