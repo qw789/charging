@@ -59,30 +59,11 @@ export default {
       this.bac="bac";
       this.dis=false;      
       this.die=false;
-      // if(this.money<=0.05){
-      //    this.bac="bac";
-      //    this.dis=false; 
-      //    this.die=false; 
-      // }else{
-      //     this.bac="";
-      //     this.dis=true;
-      //     this.die=true;
-      // }
-      
     },
     shows(){
       this.bac="bac";
       this.dis=false;
       this.die=false;
-      // if(this.money<=0.05){
-      //    this.bac="bac";
-      //    this.dis=false; 
-      //    this.die=false;   
-      // }else{
-      //    this.bac="";
-      //    this.dis=true;
-      //    this.die=true;
-      // }
     },
     charge(){
        var mp = this.$route.query.mp;

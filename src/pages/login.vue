@@ -105,11 +105,15 @@ export default {
           })
           .then(function(res) {
             if (res.data.code == 0) {
-               if(!state){
-                 location.href="/api/user?mp="+mp;
-               }else{
-                  location.href = state+"&mp="+mp;                 
-               }
+              if(state && state.length>0){
+                if(state.indexOf("?")!=-1){
+                  location.href = state+"&mp="+mp;//跳到扫码充电页面，state里面包含addr
+                }else{
+                  location.href = state+"?mp="+mp; //跳到个人中心
+                }
+              }else{
+                location.href="/api/user?mp="+mp;
+              }
             } else {
               this.disable001=false;
               this.$msgbox(res.data.msg);

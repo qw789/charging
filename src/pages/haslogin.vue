@@ -55,9 +55,9 @@
     <!-- 底部 -->
     <div class="flex-center">
       <div>
-        <div class="circle" :class="{ grayBack: grayBack }" @click="debounceClick">
+        <div class="circle" :class="{ blueBack: blueBack }" @click="debounceClick">
           <div :class="{status1:status1}">{{btText}}</div>
-          <img src="../assets/chatou.png" alt="" class="chatou" v-if="aboutData.hasLogin==true && aboutData.chargingCount==0 && aboutData.status==0">
+          <img src="../assets/chatou.png" alt="" class="chatou" v-if="aboutData.hasLogin==true && (aboutData.chargingCount==0 || stationId=='创新智慧港') && aboutData.status==0">
         </div>
         <div class="font-24" v-show="aboutData.hasLogin==true">余额
           <span>{{aboutData.available|returnFloat}}</span>
@@ -92,10 +92,11 @@ export default {
         valleyPrice: 0,
         service: 0
       },
-      grayBack: false,
+      blueBack: false,
       btText: "开始充电",
       ifBusy: "",
-      status1: false
+      status1: false,
+      stationId: ""
     };
   },
   methods: {
@@ -111,11 +112,9 @@ export default {
           function(res) {
             if (res.data.code == 0) {
               this.aboutData = res.data.data;
+              this.stationId = res.data.data.name.split("-")[0];
               //  业务逻辑
-              if (
-                this.aboutData.tenantLogo == "" ||
-                this.aboutData.tenantLogo == null
-              ) {
+              if (!this.aboutData.tenantLogo) {
                 this.aboutData.tenantLogo = "../static/recharge_logo.png";
               }
               switch (this.aboutData.status) {
@@ -153,42 +152,59 @@ export default {
                 }
                 if (this.aboutData.chargingCount != 0) {
                   //有订单，跳转到充电中
-                      var flag=true;
-                      if(this.aboutData.chargingAddr.indexOf(addr) >-1) {
-                         this.$router.push({
-                            name: "redCharging",
-                            query: { mp: mp,addr:addr,chargingCount:this.aboutData.chargingCount,flag:flag}
-                          });
-                    }
-                  // this.grayBack = true;
-                } else {
-                  //是否可用
+                  var flag = true;
+                  if (this.aboutData.chargingAddr && this.aboutData.chargingAddr.indexOf(addr) > -1) {
+                    this.$router.push({
+                      name: "redCharging",
+                      query: {
+                        mp: mp,
+                        addr: addr,
+                        chargingCount: this.aboutData.chargingCount,
+                        flag: flag
+                      }
+                    });
+                  }
+                  //临时测试
+                  if (this.stationId == "创新智慧港") {
                     if (
                       this.aboutData.status == 1 ||
-                      this.aboutData.status == 5 ||this.aboutData.status == 0
+                      this.aboutData.status == 5 ||
+                      this.aboutData.status == 0
                     ) {
-                      if(this.aboutData.hasLogin == false){
+                      if (this.aboutData.hasLogin == false) {
                         this.btText = "登录后充电";
-                      }else{
+                      } else {
                         this.btText = "开始充电"; //已经登录也插枪了
-                        if(this.aboutData.status == 0){
+                        this.blueBack = true;
+                        if (this.aboutData.status == 0) {
                           this.btText = "请插枪"; //已经登录却没插枪
                           this.status1 = true;
                         }
                       }
                     }
+                  }
+                } else {
+                  //是否可用
                   if (
-                    this.aboutData.status == 2 ||
-                    this.aboutData.status == 3 ||
-                    this.aboutData.status == 4 ||
-                    this.aboutData.status == 6
+                    this.aboutData.status == 1 ||
+                    this.aboutData.status == 5 ||
+                    this.aboutData.status == 0
                   ) {
-                    this.grayBack = true;
+                    //只有这几个状态颜色是蓝色
+                      this.blueBack = true;
+                    if (this.aboutData.hasLogin == false) {
+                      this.btText = "登录后充电";
+                    } else {
+                      this.btText = "开始充电"; //已经登录也插枪了
+                      if (this.aboutData.status == 0) {
+                        this.btText = "请插枪"; //已经登录却没插枪
+                        this.status1 = true;
+                      }
+                    }
                   }
                 }
               }
             } else {
-              this.grayBack = true;
               this.$msgbox(res.data.msg);
             }
           }.bind(this)
@@ -200,10 +216,14 @@ export default {
     gologin() {
       var addr = this.$route.query.addr;
       var mp = this.$route.query.mp;
-        if (this.aboutData.status == 1 || this.aboutData.status == 5 || this.aboutData.status == 0 ) {
+      if (this.aboutData.chargingCount == 0 ||this.stationId == "创新智慧港") {
+        if (
+          this.aboutData.status == 1 ||
+          this.aboutData.status == 5
+        ) {
           if (this.aboutData.hasLogin == false) {
             location.href =
-              "/api/login?state=http://cp.gtcx-tech.com/api/scanCharge?addr=" +
+              "/api/login?state=http://xpc.vipgz1.idcfengye.com/api/scanCharge?addr=" +
               addr +
               "&mp=" +
               mp;
@@ -216,10 +236,15 @@ export default {
               .then(
                 function(res) {
                   if (res.data.code == 0) {
-                    var flag=true;
-                     this.$router.push({
+                    var flag = true;
+                    this.$router.push({
                       name: "redCharging",
-                      query: { mp: mp, addr: addr,flag:flag,chargingCount:this.aboutData.chargingCount}
+                      query: {
+                        mp: mp,
+                        addr: addr,
+                        flag: flag,
+                        chargingCount: this.aboutData.chargingCount
+                      }
                     });
                   } else {
                     this.$msgbox(res.data.msg);
@@ -231,6 +256,7 @@ export default {
               });
           }
         }
+      }
     },
     debounceClick: debounce(function(e) {
       this.gologin();
@@ -249,7 +275,7 @@ export default {
       // var addr = this.$route.query.addr;
       this.$router.push({
         name: "redCharging",
-        query: { mp: mp}
+        query: { mp: mp }
       });
     }
   },
@@ -382,7 +408,7 @@ li {
   width: 250/75rem;
   height: 250/75rem;
   line-height: 250/75rem;
-  background: #5b9eff;
+  background: #d6d6d6;
   border-radius: 125/75rem;
   color: #fff;
   font-size: 32/75rem;
@@ -390,9 +416,6 @@ li {
   margin: 20px 0;
   position: relative;
   text-align: center;
-}
-.grayBack {
-  background: #d6d6d6;
 }
 .chatou {
   position: absolute;
@@ -442,5 +465,8 @@ li {
 }
 .middle-wi {
   width: 6rem;
+}
+.blueBack {
+  background: #5b9eff;
 }
 </style>

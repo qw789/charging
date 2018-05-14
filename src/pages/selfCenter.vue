@@ -133,7 +133,7 @@ export default {
       });
     },
     gochargeRecord(){
-      // var mp = this.$route.query.mp;
+      var mp = this.$route.query.mp;
       //充值记录
       this.$router.push({
         name: "chargeEle",
@@ -164,7 +164,6 @@ export default {
   },
   created() {
     this.getApi();
-    document.title = "个人中心";
   },
   filters: {
     returnFloat(value) {

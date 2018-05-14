@@ -59,7 +59,7 @@ const throttle = (fn, threshhold) => {
         var context = this
         var args = arguments
 
-        var now = +new Date()
+        var now = +new Date()  //这里+只是类型转换符号
 
         // 如果距离上次执行 fn 函数的时间小于 threshhold，那么就放弃
         // 执行 fn，并重新计时

@@ -45,7 +45,6 @@ export default {
     }
    },
     created() {
-    // document.title="充值结果";
     var center=this.$route.query.center;
     if(center=="self"){
       this.ChargeContinue=true;
