@@ -21,7 +21,7 @@ export default {
   methods:{
     goSelf(){
         var mp = this.$route.query.mp;
-        location.href="http://cp.gtcx-tech.com/api/user?mp="+mp
+        location.href="http://test.gtcx-tech.com/api/user?mp="+mp
     }
   },
   props:['headerData']

@@ -223,7 +223,7 @@ export default {
         ) {
           if (this.aboutData.hasLogin == false) {
             location.href =
-              "/api/login?state=http://cp.gtcx-tech.com/api/scanCharge?addr=" +
+              "/api/login?state=http://test.gtcx-tech.com/api/scanCharge?addr=" +
               addr +
               "&mp=" +
               mp;

@@ -27,7 +27,8 @@ Vue.config.productionTip = false
 const store = new Vuex.Store({
 	state:{
     isShadowing:true,
-    noDataPopup:false
+    noDataPopup:false,
+    isToggleLoading:false
   },
   mutations:{
     waitingControl(state, payload){
@@ -35,6 +36,9 @@ const store = new Vuex.Store({
     },
     noDataControl(state, payload){
       state.noDataPopup = payload.noDataPopup;
+    },
+    toggleLoading(state, payload){
+      state.isToggleLoading = payload.isToggleLoading;
     }
   }
 }) // 这里你可能已经有其他 module

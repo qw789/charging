@@ -10,6 +10,7 @@ import selfCenter from '@/pages/selfCenter'
 import haslogin from '@/pages/haslogin'
 import redCharging from '@/pages/redCharging'
 import chargingFinish from '@/pages/chargingFinish'
+import uploadImg from '@/components/uploadImg'
 
 Vue.use(Router)
 
@@ -78,6 +79,12 @@ export default new Router({
     {
       path: '/',
       meta: { title: "国投智能充" }
+    },
+    {
+      path: '/test',
+      name:'test',
+      meta: { title: "测试" },
+      component: uploadImg
     }
   ]
 })

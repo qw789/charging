@@ -62,6 +62,7 @@
     </div>
     <Shadow v-if="isShadowing"></Shadow>
     <OrderVoid v-if="noDataPopup"></OrderVoid>
+    <ToggleLoad v-if="isToggleLoading"></ToggleLoad>
     <div id="sidebar">
       <ul>
         <li class="totalOrder">我的订单</li>
@@ -78,6 +79,7 @@ import { Group, Cell, CellBox, XButton } from "vux";
 import { mapState } from "vuex";
 import Shadow from "@/components/shadow.vue";
 import OrderVoid from "@/components/orderVoid.vue";
+import ToggleLoad from '@/components/popup/load.vue'
 import water from "@/components/water";
 import GoSelf from "@/components/goSelf";
 export default {
@@ -88,7 +90,8 @@ export default {
     water,
     GoSelf,
     Shadow,
-    OrderVoid
+    OrderVoid,
+    ToggleLoad
   },
   data() {
     return {
@@ -119,7 +122,8 @@ export default {
   computed: {
     ...mapState({
       isShadowing: state => state.isShadowing,
-      noDataPopup: state => state.noDataPopup
+      noDataPopup: state => state.noDataPopup,
+      isToggleLoading:state=>state.isToggleLoading
     })
   },
   methods: {
@@ -130,7 +134,7 @@ export default {
         .post("/api/charging/charging", { mp: mp, addr: chargingIndex })
         .then(res => {
           if (res.data.code == 0) {
-            this.$store.commit("updateLoadingStatus", { isLoading: false });
+            this.$store.commit("toggleLoading", { isToggleLoading: false });
             if (res.data.data) {
               //timer中的逻辑，当有数据时返回 且hasData==false，1 hasData设置为true 2 关闭等待状态层 3 timer间隔设置为10s
               this.aboutData = res.data.data;
@@ -268,7 +272,7 @@ export default {
       }
     },
     toggleData(item) {
-      this.$store.commit("updateLoadingStatus", { isLoading: true });
+      this.$store.commit("toggleLoading", { isToggleLoading: true });            
       this.activeName = item.addr;
       this.chargingIndex = item.addr;
       this.getApi();
